@@ -10,13 +10,15 @@ jobs:
   ci:
     runs-on: ${{ matrix.os }}
 
+    env:
+      ACCOUNT_NAME: shota-kamezawa
+      BASE_REPOSITORY: base_repository
+      COPY_REPOSITORY: copy_repository
+
     strategy:
       matrix:
-        account_name: ["shooooori0128"]
         node: [12]
         os: [ubuntu-latest]
-        base_repository: ["base_repository"]
-        copy_repository: ["copy_repository"]
 
     steps:
       - name: Checkout code 🛎
@@ -25,23 +27,23 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@main
         with:
-          path: ${{ matrix.base_repository }}
-          repository: ${{ matrix.account_name }}/${{ matrix.base_repository }}
+          path: ${{ env.BASE_REPOSITORY }}
+          repository: ${{ env.ACCOUNT_NAME }}/${{ env.BASE_REPOSITORY }}
           token: ${{ secrets.SYNC_REPOSITORY }}
 
       - name: Copy target code
-        run: mv ${{ matrix.base_repository }}/src src
+        run: mv ${{ env.BASE_REPOSITORY }}/src src
 
-      - name: Clean ${{ matrix.base_repository }}
-        run: rm -rf ${{ matrix.base_repository }}
+      - name: Clean ${{ env.BASE_REPOSITORY }}
+        run: rm -rf ${{ env.BASE_REPOSITORY }}
 
       - name: Create PR
         uses: peter-evans/create-pull-request@main
         with:
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          branch: ${{ matrix.copy_repository }}
+          branch: ${{ env.COPY_REPOSITORY }}
           branch-suffix: timestamp
-          commit-message: "sync ${{ matrix.base_repository }}"
+          commit-message: "sync ${{ env.BASE_REPOSITORY }}"
           delete-branch: true
           title: "sync repository"
           token: ${{ secrets.SYNC_REPOSITORY }}
