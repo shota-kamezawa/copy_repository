@@ -31,6 +31,9 @@ jobs:
           repository: ${{ env.ACCOUNT_NAME }}/${{ env.BASE_REPOSITORY }}
           token: ${{ secrets.SYNC_REPOSITORY }}
 
+      - name: Remove current source directory
+        run: rm -rf src
+
       - name: Copy target code
         run: mv ${{ env.BASE_REPOSITORY }}/src src
 
