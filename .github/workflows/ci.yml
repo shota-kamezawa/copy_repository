@@ -29,6 +29,7 @@ jobs:
         with:
           path: ${{ env.BASE_REPOSITORY }}
           repository: ${{ env.ACCOUNT_NAME }}/${{ env.BASE_REPOSITORY }}
+          ref: ${{ github.event.client_payload.sha }}
           token: ${{ secrets.SYNC_REPOSITORY }}
 
       - name: Remove current source directory
