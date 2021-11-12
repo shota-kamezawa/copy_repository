@@ -50,4 +50,4 @@ jobs:
           commit-message: "sync ${{ env.BASE_REPOSITORY }}"
           delete-branch: true
           title: "sync repository"
-          token: ${{ secrets.SYNC_REPOSITORY }}
+          token: ${{ github.token }}
