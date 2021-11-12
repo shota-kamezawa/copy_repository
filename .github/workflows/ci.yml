@@ -34,6 +34,9 @@ jobs:
       - name: Copy target code
         run: mv ${{ env.BASE_REPOSITORY }}/src src
 
+      - name: Remove excluded files
+        run: rm -f src/**/*.stories.js src/**/*.mdx
+
       - name: Clean ${{ env.BASE_REPOSITORY }}
         run: rm -rf ${{ env.BASE_REPOSITORY }}
 
