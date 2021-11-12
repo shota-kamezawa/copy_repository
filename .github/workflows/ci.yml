@@ -13,7 +13,6 @@ jobs:
     env:
       ACCOUNT_NAME: shota-kamezawa
       BASE_REPOSITORY: base_repository
-      COPY_REPOSITORY: copy_repository
 
     strategy:
       matrix:
@@ -45,7 +44,7 @@ jobs:
         uses: peter-evans/create-pull-request@main
         with:
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          branch: ${{ env.COPY_REPOSITORY }}
+          branch: sync/${{ env.BASE_REPOSITORY }}
           branch-suffix: timestamp
           commit-message: "sync ${{ env.BASE_REPOSITORY }}"
           delete-branch: true
