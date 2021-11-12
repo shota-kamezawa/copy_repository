@@ -20,16 +20,13 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-      - name: Checkout code 🛎
-        uses: actions/checkout@main
-
       - name: Clone repository
         uses: actions/checkout@main
         with:
           path: ${{ env.BASE_REPOSITORY }}
           repository: ${{ env.ACCOUNT_NAME }}/${{ env.BASE_REPOSITORY }}
           ref: ${{ github.event.client_payload.sha }}
-          token: ${{ secrets.SYNC_REPOSITORY }}
+          token: ${{ github.token }}
 
       - name: Remove current source directory
         run: rm -rf src
