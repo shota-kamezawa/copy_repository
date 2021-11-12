@@ -48,5 +48,7 @@ jobs:
           branch-suffix: timestamp
           commit-message: "sync ${{ env.BASE_REPOSITORY }}"
           delete-branch: true
-          title: "sync repository"
+          title: ${{ github.event.client_payload.pr_title }}
+          body: Copied from ${{ github.event.client_payload.pr_url }}
+          labels: sync
           token: ${{ github.token }}
