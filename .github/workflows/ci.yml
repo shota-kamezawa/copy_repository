@@ -13,6 +13,7 @@ jobs:
     env:
       ACCOUNT_NAME: shota-kamezawa
       BASE_REPOSITORY: base_repository
+      COPY_DIRECTORIES: src/components src/pages src/utils
 
     strategy:
       matrix:
@@ -31,14 +32,14 @@ jobs:
           ref: ${{ github.event.client_payload.sha }}
           token: ${{ github.token }}
 
-      - name: Remove current source directory
-        run: rm -rf src
-
-      - name: Copy target code
-        run: mv ${{ env.BASE_REPOSITORY }}/src src
-
       - name: Remove excluded files
-        run: rm -f src/**/*.stories.js src/**/*.mdx
+        run: rm -f ${{ env.BASE_REPOSITORY }}/**/*.stories.js ${{ env.BASE_REPOSITORY }}/**/*.mdx
+
+      - name: Remove current codes
+        run: for COPY_DIR in $COPY_DIRECTORIES; do rm -rf $COPY_DIR; done
+
+      - name: Copy target codes
+        run: for COPY_DIR in $COPY_DIRECTORIES; do mv ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
 
       - name: Clean ${{ env.BASE_REPOSITORY }}
         run: rm -rf ${{ env.BASE_REPOSITORY }}
