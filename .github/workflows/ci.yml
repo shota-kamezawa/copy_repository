@@ -18,9 +18,9 @@ jobs:
         src/pages
         src/utils
         src/middleware
-      EXCLUDED_PATTERNS: |
-        **/*.stories.js
-        **/*.mdx
+      EXCLUDED_FILES: |
+        *.stories.js
+        *.mdx
 
     strategy:
       matrix:
@@ -48,7 +48,7 @@ jobs:
         run: find .
 
       - name: Remove excluded files
-        run: for EX_PATTERN in $EXCLUDED_PATTERNS; do rm -fv ${{ env.BASE_REPOSITORY }}/$EX_PATTERN; done
+        run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete; done
 
       - name: Manual removal
         run: |
