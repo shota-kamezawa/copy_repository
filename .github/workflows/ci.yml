@@ -50,6 +50,11 @@ jobs:
       - name: Remove excluded files
         run: for EX_PATTERN in $EXCLUDED_PATTERNS; do rm -fv ${{ env.BASE_REPOSITORY }}/$EX_PATTERN; done
 
+      - name: Manual removal
+        run: |
+          rm -fv ./${{ env.BASE_REPOSITORY }}/**/*.stories.js
+          rm -fv ./${{ env.BASE_REPOSITORY }}/**/*.mdx
+
       - name: Print files 2
         run: find .
 
