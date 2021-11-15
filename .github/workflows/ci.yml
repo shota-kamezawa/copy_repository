@@ -57,7 +57,7 @@ jobs:
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: sync/${{ env.BASE_REPOSITORY }}
           branch-suffix: timestamp
-          commit-message: "sync ${{ env.BASE_REPOSITORY }}"
+          commit-message: "sync ${{ env.BASE_REPOSITORY }} ${{ github.event.client_payload.sha }}"
           delete-branch: true
           title: "${{ github.event.client_payload.pr_title }}"
           body: "Copied from ${{ github.event.client_payload.pr_url }}"
