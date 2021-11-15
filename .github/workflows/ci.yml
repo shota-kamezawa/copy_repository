@@ -13,7 +13,14 @@ jobs:
     env:
       ACCOUNT_NAME: shota-kamezawa
       BASE_REPOSITORY: base_repository
-      COPY_DIRECTORIES: src/components src/pages src/utils
+      COPY_DIRECTORIES: |
+        src/components
+        src/pages
+        src/utils
+        src/middleware
+      EXCLUDED_PATTERNS: |
+        **/*.stories.js
+        **/*.mdx
 
     strategy:
       matrix:
@@ -32,17 +39,19 @@ jobs:
           ref: ${{ github.event.client_payload.sha }}
           token: ${{ github.token }}
 
+      - name: Set shell env
+        run: |
+          COPY_DIRECTORIES=(${{ env.COPY_DIRECTORIES }})
+          EXCLUDED_PATTERNS=(${{ env.EXCLUDED_PATTERNS }})
+
       - name: Print files 1
         run: find .
 
       - name: Remove excluded files
-        run: rm -f ${{ env.BASE_REPOSITORY }}/**/*.stories.js ${{ env.BASE_REPOSITORY }}/**/*.mdx
+        run: for EX_PATTERN in $EXCLUDED_PATTERNS; do rm -f ${{ env.BASE_REPOSITORY }}/$EX_PATTERN; done
 
       - name: Print files 2
         run: find .
-
-      - name: Set env for copy directories
-        run: COPY_DIRECTORIES=(${{ env.COPY_DIRECTORIES }})
 
       - name: Remove current codes
         run: for COPY_DIR in $COPY_DIRECTORIES; do rm -rf $COPY_DIR; done
