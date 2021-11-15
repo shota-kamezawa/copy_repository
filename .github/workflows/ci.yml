@@ -48,7 +48,7 @@ jobs:
         run: find .
 
       - name: Remove excluded files
-        run: for EX_PATTERN in $EXCLUDED_PATTERNS; do rm -f ${{ env.BASE_REPOSITORY }}/$EX_PATTERN; done
+        run: for EX_PATTERN in $EXCLUDED_PATTERNS; do rm -fv ${{ env.BASE_REPOSITORY }}/$EX_PATTERN; done
 
       - name: Print files 2
         run: find .
