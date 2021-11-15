@@ -32,8 +32,14 @@ jobs:
           ref: ${{ github.event.client_payload.sha }}
           token: ${{ github.token }}
 
+      - name: Print files 1
+        run: ls -la ${{ env.BASE_REPOSITORY }}
+
       - name: Remove excluded files
         run: rm -f ${{ env.BASE_REPOSITORY }}/**/*.stories.js ${{ env.BASE_REPOSITORY }}/**/*.mdx
+
+      - name: Print files 2
+        run: ls -la ${{ env.BASE_REPOSITORY }}
 
       - name: Set env for copy directories
         run: COPY_DIRECTORIES=(${{ env.COPY_DIRECTORIES }})
@@ -41,11 +47,20 @@ jobs:
       - name: Remove current codes
         run: for COPY_DIR in $COPY_DIRECTORIES; do rm -rf $COPY_DIR; done
 
+      - name: Print files 3
+        run: ls -la ${{ env.BASE_REPOSITORY }}
+
       - name: Copy target codes
         run: for COPY_DIR in $COPY_DIRECTORIES; do mv ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
 
+      - name: Print files 4
+        run: ls -la ${{ env.BASE_REPOSITORY }}
+
       - name: Clean ${{ env.BASE_REPOSITORY }}
         run: rm -rf ${{ env.BASE_REPOSITORY }}
+
+      - name: Print files 5
+        run: ls -la ${{ env.BASE_REPOSITORY }}
 
       - name: Create PR
         uses: peter-evans/create-pull-request@main
