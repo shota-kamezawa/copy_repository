@@ -35,6 +35,9 @@ jobs:
       - name: Remove excluded files
         run: rm -f ${{ env.BASE_REPOSITORY }}/**/*.stories.js ${{ env.BASE_REPOSITORY }}/**/*.mdx
 
+      - name: Set env for copy directories
+        run: COPY_DIRECTORIES=(${{ env.COPY_DIRECTORIES }})
+
       - name: Remove current codes
         run: for COPY_DIR in $COPY_DIRECTORIES; do rm -rf $COPY_DIR; done
 
