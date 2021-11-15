@@ -13,7 +13,7 @@ jobs:
     env:
       ACCOUNT_NAME: shota-kamezawa
       BASE_REPOSITORY: base_repository
-      COPY_DIRECTORIES: |
+      TARGET_DIRECTORIES: |
         src/components
         src/pages
         src/utils
@@ -39,42 +39,17 @@ jobs:
           ref: ${{ github.event.client_payload.sha }}
           token: ${{ github.token }}
 
-      - name: Set shell env
-        run: |
-          COPY_DIRECTORIES=(${{ env.COPY_DIRECTORIES }})
-          EXCLUDED_PATTERNS=(${{ env.EXCLUDED_PATTERNS }})
-
-      - name: Print files 1
-        run: find .
-
       - name: Remove excluded files
-        run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete; done
+        run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete -print; done
 
-      - name: Manual removal
-        run: |
-          rm -fv ./${{ env.BASE_REPOSITORY }}/**/*.stories.js
-          rm -fv ./${{ env.BASE_REPOSITORY }}/**/*.mdx
+      - name: Remove current directories
+        run: for COPY_DIR in $TARGET_DIRECTORIES; do rm -rf $COPY_DIR; done
 
-      - name: Print files 2
-        run: find .
-
-      - name: Remove current codes
-        run: for COPY_DIR in $COPY_DIRECTORIES; do rm -rf $COPY_DIR; done
-
-      - name: Print files 3
-        run: find .
-
-      - name: Copy target codes
-        run: for COPY_DIR in $COPY_DIRECTORIES; do mv ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
-
-      - name: Print files 4
-        run: find .
+      - name: Move target directories
+        run: for COPY_DIR in $TARGET_DIRECTORIES; do mv -v ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
 
       - name: Clean ${{ env.BASE_REPOSITORY }}
         run: rm -rf ${{ env.BASE_REPOSITORY }}
-
-      - name: Print files 5
-        run: find .
 
       - name: Create PR
         uses: peter-evans/create-pull-request@main
