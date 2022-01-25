@@ -35,8 +35,8 @@ jobs:
       - name: Checkout code 🛎
         uses: actions/checkout@main
 
-      - name: Create epic branch if not exists
-        run: git branch ${{ github.event.inputs.epic_branch }} 2> /dev/null
+      - name: Create epic branch and push it if not exists
+        run: git branch ${{ github.event.inputs.epic_branch }} 2> /dev/null && git push origin ${{ github.event.inputs.epic_branch }} 2> /dev/null
 
       - name: Switch to epic branch
         run: git switch ${{ github.event.inputs.epic_branch }}
@@ -49,12 +49,15 @@ jobs:
           ref: ${{ github.event.inputs.sha }}
           token: ${{ github.token }}
 
+      # FIXME:
       - name: Remove excluded files
         run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete -print; done
 
+      # FIXME:
       - name: Remove current directories
         run: for COPY_DIR in $TARGET_DIRECTORIES; do rm -rf $COPY_DIR; done
 
+      # FIXME:
       - name: Move target directories
         run: for COPY_DIR in $TARGET_DIRECTORIES; do mv -v ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
 
