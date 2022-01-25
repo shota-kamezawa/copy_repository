@@ -68,7 +68,7 @@ jobs:
         uses: peter-evans/create-pull-request@main
         with:
           author: ${{ github.event.sender.login }} <${{ github.event.sender.id }}+${{ github.event.sender.login }}@users.noreply.github.com>
-          branch: sync-
+          branch: ${{ github.event.inputs.epic_branch }}/sync
           branch-suffix: timestamp
           commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
           delete-branch: true
