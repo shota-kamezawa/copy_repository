@@ -67,7 +67,7 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@main
         with:
-          author: ${{ github.sender.login }} <${{ github.sender.id }}+${{ github.sender.login }}@users.noreply.github.com>
+          author: ${{ github.event.sender.login }} <${{ github.event.sender.id }}+${{ github.event.sender.login }}@users.noreply.github.com>
           branch: sync-
           branch-suffix: timestamp
           commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
