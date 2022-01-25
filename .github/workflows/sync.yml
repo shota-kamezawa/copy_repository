@@ -1,0 +1,75 @@
+name: sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      epic_branch:
+        description: Name of original base branch
+        required: true
+      pr_url:
+        description: URL of original pull request
+        required: true
+      pr_title:
+        description: Title of original pull request
+        required: true
+      sha:
+        description: SHA of merge commit
+        required: true
+
+env:
+  BASE_REPOSITORY: shota-kamezawa/base_repository
+  TARGET_DIRECTORIES: |
+    src/components
+    src/pages
+    src/utils
+    src/middleware
+  EXCLUDED_FILES: |
+    *.stories.js
+    *.mdx
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code 🛎
+        uses: actions/checkout@main
+
+      - name: Create epic branch if not exists
+        run: git branch ${{ github.event.inputs.epic_branch }} 2> /dev/null
+
+      - name: Switch to epic branch
+        run: git switch ${{ github.event.inputs.epic_branch }}
+
+      - name: Clone base repository
+        uses: actions/checkout@main
+        with:
+          path: ${{ env.BASE_REPOSITORY }}
+          repository: ${{ env.BASE_REPOSITORY }}
+          ref: ${{ github.event.inputs.sha }}
+          token: ${{ github.token }}
+
+      - name: Remove excluded files
+        run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete -print; done
+
+      - name: Remove current directories
+        run: for COPY_DIR in $TARGET_DIRECTORIES; do rm -rf $COPY_DIR; done
+
+      - name: Move target directories
+        run: for COPY_DIR in $TARGET_DIRECTORIES; do mv -v ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
+
+      - name: Remove directory '${{ env.BASE_REPOSITORY }}'
+        run: rm -rf ${{ env.BASE_REPOSITORY }}
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@main
+        with:
+          author: ${{ github.event.actor.display_login }} <${{ github.event.actor.id }}+${{ github.event.actor.login }}@users.noreply.github.com>
+          branch: sync-${{ env.BASE_REPOSITORY }}
+          branch-suffix: timestamp
+          commit-message: sync ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
+          delete-branch: true
+          title: ${{ github.event.inputs.pr_title }}
+          body: Files copied from ${{ github.event.inputs.pr_url }}
+          labels: sync
+          token: ${{ github.token }}
