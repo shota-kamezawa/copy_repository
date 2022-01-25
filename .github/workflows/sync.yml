@@ -35,11 +35,11 @@ jobs:
       - name: Checkout code 🛎
         uses: actions/checkout@main
 
-      - name: Create epic branch and push it if not exists
-        run: git branch ${{ github.event.inputs.epic_branch }} 2> /dev/null && git push origin ${{ github.event.inputs.epic_branch }}
+      - name: Fetch repository
+        run: git fetch
 
-      - name: Switch to epic branch
-        run: git switch ${{ github.event.inputs.epic_branch }}
+      - name: Create epic branch and push it if not exists
+        run: git switch ${{ github.event.inputs.epic_branch }} 2> /dev/null || (git switch -c ${{ github.event.inputs.epic_branch }} && git push origin ${{ github.event.inputs.epic_branch }})
 
       - name: Clone base repository
         uses: actions/checkout@main
