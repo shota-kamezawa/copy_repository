@@ -64,12 +64,12 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@main
         with:
-          author: ${{ github.event.actor.display_login }} <${{ github.event.actor.id }}+${{ github.event.actor.login }}@users.noreply.github.com>
-          branch: sync-${{ env.BASE_REPOSITORY }}
+          author: ${{ github.sender.login }} <${{ github.sender.id }}+${{ github.sender.login }}@users.noreply.github.com>
+          branch: sync-
           branch-suffix: timestamp
-          commit-message: sync ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
+          commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
           delete-branch: true
+          base: ${{ github.event.inputs.epic_branch }}
           title: ${{ github.event.inputs.pr_title }}
-          body: Files copied from ${{ github.event.inputs.pr_url }}
+          body: 🔄 Files copied from ${{ github.event.inputs.pr_url }}
           labels: sync
-          token: ${{ github.token }}
