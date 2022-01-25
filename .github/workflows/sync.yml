@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@main
 
       - name: Create epic branch and push it if not exists
-        run: git branch ${{ github.event.inputs.epic_branch }} 2> /dev/null && git push origin ${{ github.event.inputs.epic_branch }} 2> /dev/null
+        run: git branch ${{ github.event.inputs.epic_branch }} 2> /dev/null && git push origin ${{ github.event.inputs.epic_branch }}
 
       - name: Switch to epic branch
         run: git switch ${{ github.event.inputs.epic_branch }}
