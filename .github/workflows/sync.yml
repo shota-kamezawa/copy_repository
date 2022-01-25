@@ -73,6 +73,6 @@ jobs:
           commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
           delete-branch: true
           base: ${{ github.event.inputs.epic_branch }}
-          title: ${{ github.event.inputs.pr_title }}
-          body: 🔄 Files copied from ${{ github.event.inputs.pr_url }}
+          title: 🔄 ${{ github.event.inputs.pr_title }}
+          body: Files copied from ${{ github.event.inputs.pr_url }}
           labels: sync
