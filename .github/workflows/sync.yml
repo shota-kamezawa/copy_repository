@@ -67,12 +67,19 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@main
         with:
+          # Branch & Commit settings
           author: ${{ github.event.sender.login }} <${{ github.event.sender.id }}+${{ github.event.sender.login }}@users.noreply.github.com>
           branch: ${{ github.event.inputs.epic_branch }}-sync
           branch-suffix: timestamp
           commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
-          delete-branch: true
+          # PR settings
           base: ${{ github.event.inputs.epic_branch }}
-          title: 🔄 ${{ github.event.inputs.pr_title }}
-          body: Files copied from ${{ github.event.inputs.pr_url }}
+          body: |
+            | Name | Detail |
+            | --- | --- |
+            | Author | ${{ github.server_url }}/${{ github.event.sender.login }} |
+            | Original | ${{ github.event.inputs.pr_url }} |
+            | Action | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
+          delete-branch: true
           labels: sync
+          title: 🔄 ${{ github.event.inputs.pr_title }}
