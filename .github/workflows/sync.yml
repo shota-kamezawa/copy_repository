@@ -82,4 +82,5 @@ jobs:
             | Action | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
           delete-branch: true
           labels: sync
+          # team-reviewers: frontend-team
           title: 🔄 ${{ github.event.inputs.pr_title }}
