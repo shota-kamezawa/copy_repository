@@ -13,7 +13,7 @@ env:
   BASE_SRC_DIR: "src/app/"
   COPY_SRC_DIR: "src/"
   BASE_IMPORT_DIR: "@/src/app/"
-  DEST_IMPORT_DIR: "@/src/"
+  COPY_IMPORT_DIR: "@/src/"
 
 jobs:
   sync:
@@ -84,7 +84,7 @@ jobs:
         run: |
           echo "${{ steps.pr_files_changed.outputs.removed }}" \
             | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
-            | while read PATH_TO_REMOVE; do rm -f $PATH_TO_REMOVE; done
+            | while read PATH_TO_REMOVE; do rm -f "$PATH_TO_REMOVE"; done
 
       - name: Clone base repository
         uses: actions/checkout@main
@@ -95,11 +95,18 @@ jobs:
 
       # FIXME:
       # - name: Replace JavaScript import paths
-      #   run: echo FIXME
+      #   run: |
+      #     echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MODIFY
+      #     do
+      #       sed -i -e 's ^${{ env.BASE_IMPORT_DIR }} ${{ env.COPY_IMPORT_DIR }} g' "$PATH_TO_MODIFY"
+      #     done
 
-      # FIXME:
-      # - name: Move target directories
-      #   run: for COPY_DIR in $TARGET_DIRECTORIES; do mv -v ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
+      - name: Move files from base repository
+        run: |
+          echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MOVE
+          do
+            mv "${{ env.BASE_REPOSITORY }}/$PATH_TO_MOVE" "$(echo $PATH_TO_MOVE | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g')"
+          done
 
       - name: Remove directory of base repository
         run: rm -rf ${{ env.BASE_REPOSITORY }}
