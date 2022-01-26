@@ -23,7 +23,7 @@ jobs:
       - name: Checkout code 🛎
         uses: actions/checkout@main
 
-      - name: Fetch repository
+      - name: Fetch this repository
         run: git fetch
 
       - name: Get detail of pull request
@@ -80,6 +80,14 @@ jobs:
           echo "::set-output name=removed::$REMOVED"
           echo "::set-output name=updated::$UPDATED"
 
+      - name: Remove current files
+        env:
+          REMOVED_FILES: ${{ steps.pr_files_changed.outputs.removed }}
+        run: |
+          echo $REMOVED_FILES \
+            | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
+            | while read PATH_TO_REMOVE; do rm -f $PATH_TO_REMOVE; done
+
       - name: Clone base repository
         uses: actions/checkout@main
         with:
@@ -92,22 +100,10 @@ jobs:
       #   run: echo FIXME
 
       # FIXME:
-      # - name: Remove excluded files
-      #   run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete -print; done
-
-      - name: Remove current files
-        env:
-          REMOVED_FILES: ${{ steps.pr_files_changed.outputs.removed }}
-        run: |
-          echo $REMOVED_FILES \
-            | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
-            | while read PATH_TO_REMOVE; do rm -f $PATH_TO_REMOVE; done
-
-      # FIXME:
       # - name: Move target directories
       #   run: for COPY_DIR in $TARGET_DIRECTORIES; do mv -v ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
 
-      - name: Remove directory '${{ env.BASE_REPOSITORY }}'
+      - name: Remove directory of base repository
         run: rm -rf ${{ env.BASE_REPOSITORY }}
 
       - name: Create pull request
