@@ -63,13 +63,13 @@ jobs:
             echo $JSON \
               | jq -r '.[] | select(.previous_filename or .status == "removed") | .previous_filename // .filename' \
               | grep '^${{ env.BASE_SRC_DIR }}' \
-              | grep -E '${{ env.EXCLUDED_EXT_PATTERN }}' \
+              | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}' \
           )
           UPDATED=$( \
             echo $JSON \
               | jq -r '.[] | select(.status != "removed") | .filename' \
               | grep '^${{ env.BASE_SRC_DIR }}' \
-              | grep -E '${{ env.EXCLUDED_EXT_PATTERN }}' \
+              | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}' \
           )
           echo "::set-output name=removed::${REMOVED//$'\n'/\\n}"
           echo "::set-output name=updated::${UPDATED//$'\n'/\\n}"
