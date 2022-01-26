@@ -81,10 +81,8 @@ jobs:
           echo "::set-output name=updated::$UPDATED"
 
       - name: Remove current files
-        env:
-          REMOVED_FILES: ${{ steps.pr_files_changed.outputs.removed }}
         run: |
-          echo $REMOVED_FILES \
+          echo "${{ steps.pr_files_changed.outputs.removed }}" \
             | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
             | while read PATH_TO_REMOVE; do rm -f $PATH_TO_REMOVE; done
 
