@@ -118,7 +118,7 @@ jobs:
         with:
           # Branch & Commit settings
           author: ${{ steps.pr_detail.outputs.user_login }} <${{ steps.pr_detail.outputs.user_id }}+${{ steps.pr_detail.outputs.user_login }}@users.noreply.github.com>
-          branch: ${{ steps.pr_detail.outputs.base_ref }}-sync
+          branch: ${{ steps.pr_detail.outputs.base_ref }}--sync
           branch-suffix: timestamp
           commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ steps.pr_detail.outputs.merge_commit_sha }}
           # PR settings
