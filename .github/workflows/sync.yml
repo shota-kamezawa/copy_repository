@@ -105,7 +105,9 @@ jobs:
         run: |
           echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MOVE
           do
-            mv "${{ env.BASE_REPOSITORY }}/$PATH_TO_MOVE" "$(echo $PATH_TO_MOVE | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g')"
+            PATH_TO_PUT=$(echo $PATH_TO_MOVE | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g')
+            mkdir -p $(dirname "$PATH_TO_PUT")
+            mv -f "${{ env.BASE_REPOSITORY }}/$PATH_TO_MOVE" "$PATH_TO_PUT"
           done
 
       - name: Remove directory of base repository
