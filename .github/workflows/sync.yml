@@ -3,29 +3,17 @@ name: sync
 on:
   workflow_dispatch:
     inputs:
-      epic_branch:
-        description: Name of original base branch
-        required: true
-      pr_url:
-        description: URL of original pull request
-        required: true
-      pr_title:
-        description: Title of original pull request
-        required: true
-      sha:
-        description: SHA of merge commit
+      pr_number:
+        description: Issue number of original pull request
         required: true
 
 env:
   BASE_REPOSITORY: shota-kamezawa/base_repository
-  TARGET_DIRECTORIES: |
-    src/components
-    src/pages
-    src/utils
-    src/middleware
-  EXCLUDED_FILES: |
-    *.stories.js
-    *.mdx
+  EXCLUDED_EXT_PATTERN: "\\.(mdx|mock\\.json|stories\\.js)$"
+  BASE_SRC_DIR: "src/app/"
+  COPY_SRC_DIR: "src/"
+  BASE_IMPORT_DIR: "@/src/app/"
+  DEST_IMPORT_DIR: "@/src/"
 
 jobs:
   sync:
@@ -38,28 +26,78 @@ jobs:
       - name: Fetch repository
         run: git fetch
 
+      - name: Get detail of pull request
+        id: pr_detail
+        run: |
+          JSON=$( \
+            curl -fsSL -i \
+              -H "Authorization: token ${{ github.token }}" \
+              -H "Content-Type: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }} \
+              | tr -d '[:cntrl:]' \
+          )
+          echo "::set-output name=html_url::$(echo $JSON | jq -r '.html_url')"
+          echo "::set-output name=merge_commit_sha::$(echo $JSON | jq -r '.merge_commit_sha')"
+          echo "::set-output name=base_ref::$(echo $JSON | jq -r '.base.ref')"
+          echo "::set-output name=title::$(echo $JSON | jq -r '.title')"
+          echo "::set-output name=user_login::$(echo $JSON | jq -r '.user.login')"
+          echo "::set-output name=user_id::$(echo $JSON | jq -r '.user.id')"
+          echo "::set-output name=user_html_url::$(echo $JSON | jq -r '.user.html_url')"
+
       - name: Create epic branch and push it if not exists
-        run: git switch ${{ github.event.inputs.epic_branch }} 2> /dev/null || (git switch -c ${{ github.event.inputs.epic_branch }} && git push origin ${{ github.event.inputs.epic_branch }})
+        run: |
+          git switch ${{ steps.pr_detail.outputs.base_ref }} 2> /dev/null \
+            || (git switch -c ${{ steps.pr_detail.outputs.base_ref }} && git push origin ${{ steps.pr_detail.outputs.base_ref }})
+
+      - name: Get files changed of pull request
+        id: pr_files_changed
+        run: |
+          JSON=$( \
+            curl -fsSL -i \
+              -H "Authorization: token ${{ github.token }}" \
+              -H "Content-Type: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/12/files \
+              | tr -d '[:cntrl:]' \
+          )
+          REMOVED=$( \
+            echo $JSON \
+              | jq -r '.[] | select(.previous_filename or .status == "removed") | .previous_filename // .filename' \
+              | grep '^${{ env.BASE_SRC_DIR }}' \
+              | grep -E '${{ env.EXCLUDED_EXT_PATTERN }}' \
+          )
+          UPDATED=$( \
+            echo $JSON \
+              | jq -r '.[] | select(.status != "removed") | .filename' \
+              | grep '^${{ env.BASE_SRC_DIR }}' \
+              | grep -E '${{ env.EXCLUDED_EXT_PATTERN }}' \
+          )
+          echo "::set-output name=removed::${REMOVED//$'\n'/\\n}"
+          echo "::set-output name=updated::${UPDATED//$'\n'/\\n}"
 
       - name: Clone base repository
         uses: actions/checkout@main
         with:
           path: ${{ env.BASE_REPOSITORY }}
           repository: ${{ env.BASE_REPOSITORY }}
-          ref: ${{ github.event.inputs.sha }}
-          token: ${{ github.token }}
+          ref: ${{ steps.pr_detail.outputs.merge_commit_sha }}
 
       # FIXME:
-      - name: Remove excluded files
-        run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete -print; done
+      # - name: Replace JavaScript import paths
+      #   run: echo FIXME
 
       # FIXME:
-      - name: Remove current directories
-        run: for COPY_DIR in $TARGET_DIRECTORIES; do rm -rf $COPY_DIR; done
+      # - name: Remove excluded files
+      #   run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete -print; done
+
+      - name: Remove current files
+        run: |
+          echo '${{ steps.pr_files_changed.removed }}' \
+            | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
+            | while read PATH_TO_REMOVE; do rm -f $PATH_TO_REMOVE; done
 
       # FIXME:
-      - name: Move target directories
-        run: for COPY_DIR in $TARGET_DIRECTORIES; do mv -v ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
+      # - name: Move target directories
+      #   run: for COPY_DIR in $TARGET_DIRECTORIES; do mv -v ${{ env.BASE_REPOSITORY }}/$COPY_DIR $COPY_DIR; done
 
       - name: Remove directory '${{ env.BASE_REPOSITORY }}'
         run: rm -rf ${{ env.BASE_REPOSITORY }}
@@ -68,19 +106,19 @@ jobs:
         uses: peter-evans/create-pull-request@main
         with:
           # Branch & Commit settings
-          author: ${{ github.event.sender.login }} <${{ github.event.sender.id }}+${{ github.event.sender.login }}@users.noreply.github.com>
-          branch: ${{ github.event.inputs.epic_branch }}-sync
+          author: ${{ steps.pr_detail.outputs.user_login }} <${{ steps.pr_detail.outputs.user_id }}+${{ steps.pr_detail.outputs.user_login }}@users.noreply.github.com>
+          branch: ${{ steps.pr_detail.outputs.base_ref }}-sync
           branch-suffix: timestamp
-          commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ github.event.inputs.sha }}
+          commit-message: 🔄 sync with ${{ env.BASE_REPOSITORY }}/${{ steps.pr_detail.outputs.merge_commit_sha }}
           # PR settings
-          base: ${{ github.event.inputs.epic_branch }}
+          base: ${{ steps.pr_detail.outputs.base_ref }}
           body: |
             | Name | Detail |
             | --- | --- |
-            | Author | ${{ github.server_url }}/${{ github.event.sender.login }} |
-            | Original | ${{ github.event.inputs.pr_url }} |
+            | Developer | ${{ steps.pr_detail.outputs.user_html_url }} |
+            | Original | ${{ steps.pr_detail.outputs.html_url }} |
             | Action | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
           delete-branch: true
           labels: sync
           # team-reviewers: frontend-team
-          title: 🔄 ${{ github.event.inputs.pr_title }}
+          title: 🔄 ${{ steps.pr_detail.outputs.title }}
