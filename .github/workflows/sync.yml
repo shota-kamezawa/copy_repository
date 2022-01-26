@@ -90,8 +90,10 @@ jobs:
       #   run: for EX_FILE in $EXCLUDED_FILES; do find ${{ env.BASE_REPOSITORY }} -type f -name $EX_FILE -delete -print; done
 
       - name: Remove current files
+        env:
+          REMOVED_FILES: ${{ steps.pr_files_changed.outputs.removed }}
         run: |
-          echo '${{ steps.pr_files_changed.removed }}' \
+          echo $REMOVED_FILES \
             | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
             | while read PATH_TO_REMOVE; do rm -f $PATH_TO_REMOVE; done
 
