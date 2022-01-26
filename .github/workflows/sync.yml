@@ -71,8 +71,14 @@ jobs:
               | grep '^${{ env.BASE_SRC_DIR }}' \
               | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}' \
           )
-          echo "::set-output name=removed::${REMOVED//$'\n'/\\n}"
-          echo "::set-output name=updated::${UPDATED//$'\n'/\\n}"
+          REMOVED="${REMOVED//'%'/'%25'}"
+          REMOVED="${REMOVED//$'\n'/'%0A'}"
+          REMOVED="${REMOVED//$'\r'/'%0D'}"
+          UPDATED="${UPDATED//'%'/'%25'}"
+          UPDATED="${UPDATED//$'\n'/'%0A'}"
+          UPDATED="${UPDATED//$'\r'/'%0D'}"
+          echo "::set-output name=removed::$REMOVED"
+          echo "::set-output name=updated::$UPDATED"
 
       - name: Clone base repository
         uses: actions/checkout@main
