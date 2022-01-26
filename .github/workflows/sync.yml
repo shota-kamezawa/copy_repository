@@ -9,11 +9,12 @@ on:
 
 env:
   BASE_REPOSITORY: shota-kamezawa/base_repository
+  ALLOWED_BRANCH_PREFIX: epic-
   EXCLUDED_EXT_PATTERN: "\\.(mdx|mock\\.json|stories\\.js)$"
   BASE_SRC_DIR: "src/app/"
   COPY_SRC_DIR: "src/"
-  BASE_IMPORT_DIR: "@/src/app/"
-  COPY_IMPORT_DIR: "@/src/"
+  BASE_IMPORT_DIR: "@/app/"
+  COPY_IMPORT_DIR: "@/"
 
 jobs:
   sync:
@@ -43,6 +44,10 @@ jobs:
           echo "::set-output name=user_login::$(echo $JSON | jq -r '.user.login')"
           echo "::set-output name=user_id::$(echo $JSON | jq -r '.user.id')"
           echo "::set-output name=user_html_url::$(echo $JSON | jq -r '.user.html_url')"
+
+      - name: Exit if base branch name is not allowed
+        if: startsWith(steps.pr_detail.outputs.base_ref, env.ALLOWED_BRANCH_PREFIX) != true
+        run: exit 1
 
       - name: Create epic branch and push it if not exists
         run: |
@@ -127,8 +132,8 @@ jobs:
             | Name | Detail |
             | --- | --- |
             | Developer | ${{ steps.pr_detail.outputs.user_html_url }} |
-            | Original | ${{ steps.pr_detail.outputs.html_url }} |
-            | Action | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
+            | Original PR | ${{ steps.pr_detail.outputs.html_url }} |
+            | Jobs | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
           delete-branch: true
           labels: sync
           # team-reviewers: frontend-team
