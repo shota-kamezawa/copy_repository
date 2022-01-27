@@ -89,7 +89,10 @@ jobs:
         run: |
           echo "${{ steps.pr_files_changed.outputs.removed }}" \
             | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
-            | while read PATH_TO_REMOVE; do rm -f "$PATH_TO_REMOVE"; done
+            | while read PATH_TO_REMOVE
+          do
+            rm -f "$PATH_TO_REMOVE"
+          done
 
       - name: Clone base repository
         uses: actions/checkout@main
