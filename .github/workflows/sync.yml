@@ -13,6 +13,8 @@ env:
   EXCLUDED_EXT_PATTERN: "\\.(mdx|mock\\.json|stories\\.js)$"
   BASE_SRC_DIR: "src/app/"
   COPY_SRC_DIR: "src/"
+  BASE_IMPORT_PREFIX_PATTERN: "[@~]/app/"
+  COPY_IMPORT_PREFIX: "@/"
   TEAM_REVIEWERS: "frontend-team"
 
 jobs:
@@ -100,13 +102,12 @@ jobs:
           repository: ${{ env.BASE_REPOSITORY }}
           ref: ${{ steps.pr_detail.outputs.merge_commit_sha }}
 
-      # FIXME:
-      # - name: Replace JavaScript import paths
-      #   run: |
-      #     echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MODIFY
-      #     do
-      #       sed -i -e 's ^${{ env.BASE_IMPORT_DIR }} ${{ env.COPY_IMPORT_DIR }} g' "$PATH_TO_MODIFY"
-      #     done
+      - name: Replace JavaScript/SCSS import paths
+        run: |
+          echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MODIFY
+          do
+            sed -i -e 's ^${{ env.BASE_IMPORT_PREFIX_PATTERN }} ${{ env.COPY_IMPORT_PREFIX }} g' "${{ env.BASE_REPOSITORY }}/$PATH_TO_MODIFY"
+          done
 
       - name: Move files from base repository
         run: |
