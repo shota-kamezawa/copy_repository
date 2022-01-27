@@ -101,7 +101,7 @@ jobs:
           echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MODIFY
           do
             env LC_ALL=C \
-              sed -i -e 's ^${{ env.BASE_IMPORT_PREFIX_PATTERN }} ${{ env.COPY_IMPORT_PREFIX }} g' "${{ env.BASE_REPOSITORY }}/$PATH_TO_MODIFY"
+              sed -i -e 's ${{ env.BASE_IMPORT_PREFIX_PATTERN }} ${{ env.COPY_IMPORT_PREFIX }} g' "${{ env.BASE_REPOSITORY }}/$PATH_TO_MODIFY"
           done
 
       - name: Move files from base repository
