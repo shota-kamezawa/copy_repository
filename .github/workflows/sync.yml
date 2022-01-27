@@ -63,13 +63,11 @@ jobs:
             > $TEMP_JSON
           REMOVED=$( \
             jq -r '.[] | select(.previous_filename or .status == "removed") | .previous_filename // .filename' $TEMP_JSON \
-              | grep '^${{ env.BASE_SRC_DIR }}' \
-              | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}' \
+              | (grep '^${{ env.BASE_SRC_DIR }}' | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}') || true \
           )
           UPDATED=$( \
             jq -r '.[] | select(.status != "removed") | .filename' $TEMP_JSON \
-              | grep '^${{ env.BASE_SRC_DIR }}' \
-              | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}' \
+              | (grep '^${{ env.BASE_SRC_DIR }}' | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}') || true \
           )
           REMOVED="${REMOVED//'%'/'%25'}"
           REMOVED="${REMOVED//$'\n'/'%0A'}"
