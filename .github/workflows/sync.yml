@@ -13,8 +13,7 @@ env:
   EXCLUDED_EXT_PATTERN: "\\.(mdx|mock\\.json|stories\\.js)$"
   BASE_SRC_DIR: "src/app/"
   COPY_SRC_DIR: "src/"
-  BASE_IMPORT_DIR: "@/app/"
-  COPY_IMPORT_DIR: "@/"
+  TEAM_REVIEWERS: "frontend-team"
 
 jobs:
   sync:
@@ -139,5 +138,5 @@ jobs:
             | Jobs | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
           delete-branch: true
           labels: sync
-          # team-reviewers: frontend-team
+          # team-reviewers: ${{ env.TEAM_REVIEWERS }}
           title: 🔄 ${{ steps.pr_detail.outputs.title }}
