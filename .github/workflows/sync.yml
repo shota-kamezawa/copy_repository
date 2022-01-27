@@ -31,19 +31,18 @@ jobs:
       - name: Get detail of pull request
         id: pr_detail
         run: |
-          JSON=$( \
-            curl -fsSL \
-              -H "Authorization: token ${{ github.token }}" \
-              "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}" \
-              | sed -e 's \\ \\\\ g' \
-          )
-          echo "::set-output name=html_url::$(echo $JSON | jq -r '.html_url')"
-          echo "::set-output name=merge_commit_sha::$(echo $JSON | jq -r '.merge_commit_sha')"
-          echo "::set-output name=base_ref::$(echo $JSON | jq -r '.base.ref')"
-          echo "::set-output name=title::$(echo $JSON | jq -r '.title')"
-          echo "::set-output name=user_login::$(echo $JSON | jq -r '.user.login')"
-          echo "::set-output name=user_id::$(echo $JSON | jq -r '.user.id')"
-          echo "::set-output name=user_html_url::$(echo $JSON | jq -r '.user.html_url')"
+          TEMP_JSON=$(mktemp)
+          curl -fsSL \
+            -H "Authorization: token ${{ github.token }}" \
+            "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}" \
+            > $TEMP_JSON
+          echo "::set-output name=html_url::$(jq -r '.html_url' $TEMP_JSON)"
+          echo "::set-output name=merge_commit_sha::$(jq -r '.merge_commit_sha' $TEMP_JSON)"
+          echo "::set-output name=base_ref::$(jq -r '.base.ref' $TEMP_JSON)"
+          echo "::set-output name=title::$(jq -r '.title' $TEMP_JSON)"
+          echo "::set-output name=user_login::$(jq -r '.user.login' $TEMP_JSON)"
+          echo "::set-output name=user_id::$(jq -r '.user.id' $TEMP_JSON)"
+          echo "::set-output name=user_html_url::$(jq -r '.user.html_url' $TEMP_JSON)"
 
       - name: Exit if base branch name is not allowed
         if: startsWith(steps.pr_detail.outputs.base_ref, env.ALLOWED_BRANCH_PREFIX) != true
@@ -57,21 +56,18 @@ jobs:
       - name: Get files changed of pull request
         id: pr_files_changed
         run: |
-          JSON=$( \
-            curl -fsSL \
-              -H "Authorization: token ${{ github.token }}" \
-              "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}/files" \
-              | sed -e 's \\ \\\\ g' \
-          )
+          TEMP_JSON=$(mktemp)
+          curl -fsSL \
+            -H "Authorization: token ${{ github.token }}" \
+            "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}/files" \
+            > $TEMP_JSON
           REMOVED=$( \
-            echo $JSON \
-              | jq -r '.[] | select(.previous_filename or .status == "removed") | .previous_filename // .filename' \
+            jq -r '.[] | select(.previous_filename or .status == "removed") | .previous_filename // .filename' $TEMP_JSON \
               | grep '^${{ env.BASE_SRC_DIR }}' \
               | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}' \
           )
           UPDATED=$( \
-            echo $JSON \
-              | jq -r '.[] | select(.status != "removed") | .filename' \
+            jq -r '.[] | select(.status != "removed") | .filename' $TEMP_JSON \
               | grep '^${{ env.BASE_SRC_DIR }}' \
               | grep -vE '${{ env.EXCLUDED_EXT_PATTERN }}' \
           )
