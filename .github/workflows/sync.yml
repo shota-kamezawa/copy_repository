@@ -37,7 +37,6 @@ jobs:
           JSON=$( \
             curl -fsSL \
               -H "Authorization: token ${{ github.token }}" \
-              -H "Content-Type: application/vnd.github.v3+json" \
               "${{ env.PULL_REQUEST_API_ENDPOINT }}" \
           )
           JSON=$(echo $JSON | tr -d '[:cntrl:]')
@@ -64,7 +63,6 @@ jobs:
           JSON=$( \
             curl -fsSL \
               -H "Authorization: token ${{ github.token }}" \
-              -H "Content-Type: application/vnd.github.v3+json" \
               "${{ env.PULL_REQUEST_API_ENDPOINT }}/files" \
           )
           JSON=$(echo $JSON | tr -d '[:cntrl:]')
