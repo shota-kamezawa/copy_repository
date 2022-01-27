@@ -35,8 +35,8 @@ jobs:
             curl -fsSL \
               -H "Authorization: token ${{ github.token }}" \
               "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}" \
+              | sed -e 's \\ \\\\ g' \
           )
-          JSON=$(echo $JSON | tr -d '[:cntrl:]')
           echo "::set-output name=html_url::$(echo $JSON | jq -r '.html_url')"
           echo "::set-output name=merge_commit_sha::$(echo $JSON | jq -r '.merge_commit_sha')"
           echo "::set-output name=base_ref::$(echo $JSON | jq -r '.base.ref')"
@@ -61,8 +61,8 @@ jobs:
             curl -fsSL \
               -H "Authorization: token ${{ github.token }}" \
               "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}/files" \
+              | sed -e 's \\ \\\\ g' \
           )
-          JSON=$(echo $JSON | tr -d '[:cntrl:]')
           REMOVED=$( \
             echo $JSON \
               | jq -r '.[] | select(.previous_filename or .status == "removed") | .previous_filename // .filename' \
