@@ -21,9 +21,6 @@ jobs:
   sync:
     runs-on: ubuntu-latest
 
-    env:
-      PULL_REQUEST_API_ENDPOINT: "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}"
-
     steps:
       - name: Checkout code 🛎
         uses: actions/checkout@main
@@ -37,7 +34,7 @@ jobs:
           JSON=$( \
             curl -fsSL \
               -H "Authorization: token ${{ github.token }}" \
-              "${{ env.PULL_REQUEST_API_ENDPOINT }}" \
+              "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}" \
           )
           JSON=$(echo $JSON | tr -d '[:cntrl:]')
           echo "::set-output name=html_url::$(echo $JSON | jq -r '.html_url')"
@@ -63,7 +60,7 @@ jobs:
           JSON=$( \
             curl -fsSL \
               -H "Authorization: token ${{ github.token }}" \
-              "${{ env.PULL_REQUEST_API_ENDPOINT }}/files" \
+              "https://api.github.com/repos/${{ env.BASE_REPOSITORY }}/pulls/${{ github.event.inputs.pr_number }}/files" \
           )
           JSON=$(echo $JSON | tr -d '[:cntrl:]')
           REMOVED=$( \
