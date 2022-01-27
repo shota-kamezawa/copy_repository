@@ -8,14 +8,14 @@ on:
         required: true
 
 env:
-  BASE_REPOSITORY: "shota-kamezawa/base_repository"
-  ALLOWED_BRANCH_PREFIX: "epic-"
+  BASE_REPOSITORY: shota-kamezawa/base_repository
+  ALLOWED_BRANCH_PREFIX: epic-
   EXCLUDED_EXT_PATTERN: "\\.(mdx|mock\\.json|stories\\.js)$"
-  BASE_SRC_DIR: "src/app/"
-  COPY_SRC_DIR: "src/"
+  BASE_SRC_DIR: src/app/
+  COPY_SRC_DIR: src/
   BASE_IMPORT_PREFIX_PATTERN: "[@~]/app/"
   COPY_IMPORT_PREFIX: "@/"
-  TEAM_REVIEWERS: "frontend-team"
+  TEAM_REVIEWERS: frontend-team
 
 jobs:
   sync:
