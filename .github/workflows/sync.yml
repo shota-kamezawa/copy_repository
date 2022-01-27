@@ -79,6 +79,7 @@ jobs:
           echo "::set-output name=updated::$UPDATED"
 
       - name: Remove current files
+        if: steps.pr_files_changed.outputs.removed != ''
         run: |
           echo "${{ steps.pr_files_changed.outputs.removed }}" \
             | sed -e 's ^${{ env.BASE_SRC_DIR }} ${{ env.COPY_SRC_DIR }} g' \
@@ -95,6 +96,7 @@ jobs:
           ref: ${{ steps.pr_detail.outputs.merge_commit_sha }}
 
       - name: Replace JavaScript/SCSS import paths
+        if: steps.pr_files_changed.outputs.updated != ''
         run: |
           echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MODIFY
           do
@@ -103,6 +105,7 @@ jobs:
           done
 
       - name: Move files from base repository
+        if: steps.pr_files_changed.outputs.updated != ''
         run: |
           echo "${{ steps.pr_files_changed.outputs.updated }}" | while read PATH_TO_MOVE
           do
